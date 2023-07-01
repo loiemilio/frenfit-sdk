@@ -1,0 +1,1088 @@
+{% unless flwz%}{% assign flwz = "{ \"empty\": 0 }" %}{% endunless %}<!DOCTYPE html>
+
+
+
+
+<html>
+<head>
+
+    <base href="/earlyadopters/">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Bookmarks</title>
+    <meta name="description" content="Frenf:it! The social network of social networks">
+    <meta name="author" content="Michele Arciprete">
+    <meta property="og:type" content="article"/>
+    <meta property="og:site_name" content="frenf:it"/>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <style>
+    body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+    }
+    </style>
+    <script src="/earlyadopters/static/plugins/jquery-1.10.2/js/jquery/jquery-1.10.2.min.js" type="text/javascript" ></script>
+<link href="/earlyadopters/static/bundle-fixtaglib_head.css" type="text/css" rel="stylesheet" media="screen, projection" />
+<link href="/earlyadopters/static/bundle-bundle_bootstrap_head.css" type="text/css" rel="stylesheet" media="screen, projection" />
+
+
+
+    <link rel="shortcut icon" href="/earlyadopters/static/images/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/earlyadopters/static/images/apple-touch-icon.png">
+    <link rel="stylesheet" href="/earlyadopters/static/js/lightbox2/css/lightbox.min.css"/>
+    <link rel="stylesheet" href="/earlyadopters/static/css/frenf.css" type="text/css">
+
+    
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <script src="/earlyadopters/static/js/jquery/hovercard.min.js"></script>
+    <script src="/earlyadopters/static/js/bootstrap/hacked_bootstrap.min.js"></script>
+    <script src="/earlyadopters/static/js/lightbox2/js/lightbox.min.js" defer></script>
+    <script src="/earlyadopters/static/js/spin/spin.min.js"></script>
+    <script src="/earlyadopters/static/js/jquery/jquery.autosize.js"></script>
+    <script>
+        var serverUrl = "//www.frenf.it/earlyadopters";
+        var rtHost = "/realtime/message";
+        var blockedIdList = "";
+        var flwz = {{ flwz }};
+    </script>
+
+
+    <script type="text/javascript">
+        var popup = new Array()
+        var spinner = new Spinner().spin();
+
+        function setCardValue(card, userId) {
+            if (popup[userId]==undefined) {
+
+                $.ajax({
+                    url: "/earlyadopters/feed/hovercard",
+                    data: {id: userId},
+                    success: function(data) {
+                        var json = $.parseJSON(data);
+                        var actions="";
+
+                        if (json.action != undefined) {
+                            //actions += '<li>'+json.actionLink+'</li>'
+                            actions += '<li><a href="javascript:;" class="hc-following-link" data-id="'+ userId +'" data-action="'+json.action+'">'+ json.action + '</a>' +
+                                    '<span class="hc-spinner hide"><img src="' + '/earlyadopters/static/images/gif/basket-spinner.gif' + '"/></span>' +
+                                    '</li>'
+                        }
+                        var following = "";
+                        if (json.dmLink) {
+                            actions += '<li><a href="'+json.dmLink+'">Direct message</a></li>'
+                            following = '<ul class="s-stats"><li><span class="label">Follows you</li></ul>'
+                        }
+
+                        var content =  '<div class="s-card s-card-pad">' +
+                                '<img class="s-img" src="'+json.image+'">' +
+                                '<label class="s-name">'+json.name+'</label>(<a class="s-username" target="_blank" href="'+serverUrl + "/"+json.username+'">@'+json.username+'</a>)' +
+                                '<label class="s-loc">'+json.bio+'</label>' +
+                                '<p class="s-desc"></p>' +
+                                following +
+                                '<ul class="s-stats">'+actions+'</ul>' +
+                                '</div>';
+                        card.html(content);
+                        popup[userId] = card
+                    },
+                    error: function() {
+                    },
+                    complete: function() {
+                    }
+                })
+
+            } else {
+                card.html(popup[userId].html())
+            }
+        }
+
+        $(function(){
+            var $entryBody = $(".entry-body");
+
+            $('.sandwich').on('click', function () {
+                $('#colPush').toggleClass('span0 span3');
+                return false;
+            });
+
+            $entryBody.on('click', 'a.hc-following-link', function() {
+                var link = $(this);
+                var userId = link.data('id');
+                var action = link.data('action');
+                $.ajax({
+                    url: "user/"+action,
+                    data: {id: userId, hovercard:true},
+                    success: function(data){
+                        var json = jQuery.parseJSON(data);
+                        link.text(json.label);
+                        if (json.action=="WAIT") {
+                            disable(link)
+                        } else {
+                            link.attr('data-action', json.action)
+                        }
+                    },
+                    error: function(data) {},
+                    beforeSend: function() {
+                        link.next('.hc-spinner').removeClass('hide')
+                    },
+                    complete: function() {
+                        link.next('.hc-spinner').addClass('hide')
+                    }
+                });
+                return false;
+            });
+
+
+            $entryBody.on('mouseenter', 'a.user', function() {
+                var link = $(this);
+                if (link.parent('.hc-preview').size()==0) {
+                    link.hovercard({
+                        detailsHTML: "<div class=\"card\"><img src=\"/earlyadopters/static/images/gif/basket-spinner.gif\"/> plis ueit</div>",
+                        delay: 666,
+                        onHoverIn: function() {
+                            var parent = link.parent().find('.card');
+                            setCardValue(parent, link.data('id'));
+                        },
+                        onHoverOut: function() {
+                            link.removeClass('hc-name')
+                        }
+                    });
+                    link.trigger('mouseenter')
+                }
+                link.addClass('hc-name')
+            })
+        });
+    </script>
+
+    <script type="text/javascript">
+        var host = "//www.frenf.it/earlyadopters";
+        var userId = -1;
+
+        function imgNotFound(elem) {
+            $(elem).unbind("error").attr("src", "static/images/no-avatar.png");
+        };
+
+        $(function(){
+            var $feed = $("#feed");
+            var $body = $("body");
+
+
+            $feed.on("click", ".postLinks a.bookmark", function(event) {
+                var click = $(this);
+                var id = click.data('id')
+                $.ajax({
+                    url: "bookmark/bookmark",
+                    data: {id:id},
+                    success: function(data, textStatus) {
+                        $('#bookmark_' + id).html(data);
+                    },
+                    beforeSend: function() {
+                        appendSpinner(click)
+                    },
+                    complete: function() {
+                        removeSpinner(click)
+                    },
+                    error: function(XMLHttpRequest,textStatus,errorThrown) {}
+                });
+                return false;
+            });
+
+            $(".followingButton, #frenfs").on("click", "a.follow", function(event) {
+                var div = $(this).parent();
+                var id = ($(this).data('uid'));
+                $.ajax({
+                    url: "user/follow",
+                    data: {id: id},
+                    beforeSend: function() {
+                        $('.loading', div).show();
+                    },
+                    success: function(data,textStatus) {
+                        div.html(data);
+                    },
+                    error: function(XMLHttpRequest,textStatus,errorThrown){
+                        showError(XMLHttpRequest,textStatus,errorThrown);
+                    },
+                    complete: function(){
+                        $('.loading', div).hide();
+                        $('.card .followingButton a').addClass('btn-mini')
+                    }
+                });
+                return false;
+            });
+
+            $('.followingButton, #frenfs').on('click', 'a.unfollow', function() {
+                var div = $(this).parent();
+                var id = ($(this).data('uid'));
+                $.ajax({
+                    url: "user/unfollow",
+                    data: {id: id},
+                    beforeSend: function() {
+                        $('.loading', div).show();
+                    },
+                    success: function(data,textStatus) {
+                        div.html(data);},
+                    error: function(XMLHttpRequest,textStatus,errorThrown){},
+                    complete: function(){
+                        $('.loading', div).hide();
+                        $('.card .followingButton a').addClass('btn-mini')
+                    }
+                });
+                return false;
+            });
+
+            var map = 
+                    prepareRecipients(map);
+
+            var $th = $(".typeahead");
+            bindTypeahead($th, flwz);
+
+            $('.remote-image').each(function (i, val){
+                loadRemoteImage(val)
+            });
+
+            var $followingButton = $('#followingButton');
+            $followingButton.ajaxStart(function() {
+                // show loading
+                $(".loading", this).show();
+                // Add class of disabled to form element
+                $('a', this).addClass("disabled");
+            });
+            $followingButton.ajaxComplete(function() {
+                // show loading
+                $(".loading", this).hide();
+                // Add class of disabled to form element
+                $('a', this).removeClass("disabled");
+            });
+
+            $body.on("click", ".attach-image", function(event) {
+                var $btn = $(this);
+                var $form = $btn.parents("form")[0];
+                $(".addImages", $form).toggle("blind");
+                if($(".addImages", $form).css("display") == "inline") {
+                    $(".filesToUpload").removeAttr("disabled");
+                } else {
+                    $(".filesToUpload").attr("disabled", "disabled");
+                }
+                return false;
+            });
+
+            $body.on("click", "a.message-button", function(event) {
+                var btn = $(this);
+                var textArea = btn.prevAll('.message');
+                var spinner = $('#aSpinner').clone();
+
+                var $form = btn.parents("form")[0];
+                var request = new FormData($form);
+
+                var $modal = $("#warningModal");
+                $.ajax({
+                    type:'post',
+                    contentType : false,
+                    mimeType    : 'multipart/form-data',
+                    url: "/earlyadopters/message/postToFrenfi",
+                    cache: false,
+
+                    processData: false,
+                    data: request,//$("#messageForm").serialize(),
+                    success:function(data,textStatus){
+                        addPost(data);
+                        $('.filesToUpload', $form).val("");
+                        $modal.modal("hide");
+                    },
+                    beforeSend: function() {
+                        btn.addClass('disabled');
+                        btn.attr('disabled',true);
+                        btn.parent().append(spinner);
+                        spinner.show()
+                    },
+                    error:function(XMLHttpRequest,textStatus,errorThrown){
+                        spinner.remove();
+                        if($modal.css("display") === "none") {
+                            showError(XMLHttpRequest, textStatus, errorThrown);
+                        } else {
+                            $(".modal-body p", $modal).html(XMLHttpRequest.responseText);
+                        }
+                    },
+                    complete:function(XMLHttpRequest,textStatus){
+                        btn.removeClass('disabled');
+                        btn.removeAttr('disabled');
+                        spinner.remove();
+                        //TODO: filtrare rcptInput con contenitore
+                        $('.rcptInput').hide();
+                    }
+                });
+                return false
+            });
+
+            $body.on('click', 'a.subscription', function () {
+                var link = $(this);
+                var action = link.data('action');
+                var id = link.data('id');
+                var spinner = $('#aSpinner').clone();
+                $.ajax({
+                    type: 'post',
+                    data: {id: id},
+                    url: 'room/' + action,
+                    success: function (data, textStatus) {
+                        updateSubscriptionLink(data, link);
+                    },
+                    beforeSend: function () {
+                        link.addClass('disabled');
+                        link.attr('disabled', true);
+                        link.parent().append(spinner);
+                        spinner.show();
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        showError(XMLHttpRequest, textStatus, errorThrown);
+                    },
+                    complete: function (XMLHttpRequest, textStatus) {
+                        spinner.remove();
+                    }
+                });
+                return false
+            });
+
+            $body.on('click', '.other-posts', function () {
+                var link = $(this);
+                var id = link.data('id');
+                $.ajax({
+                    url: 'feed/retrieveOtherEntries/' + id,
+                    success: function (data) {
+                        $("#other-" + id).html(data);
+                    },
+                    beforeSend: function () {
+                        appendSpinner(link)
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        showError(XMLHttpRequest, textStatus, errorThrown);
+                    }
+
+                });
+                return false
+            });
+
+            $(document).on( 'keydown', 'textarea', function(event){
+                if(event.keyCode==13) {
+                    event.preventDefault();
+                    var textArea = $(this);
+                    if (textArea.val().length > 0)
+                    //click su tutti i bottoni: prima submit e poi cancel
+                        textArea.nextAll('.btn').click();
+                    textArea.blur();
+                }
+            });
+
+            $('textarea').autosize({append: "\n"});
+        });
+
+        function retrieveAllComments(id) {
+            $.ajax({
+                url: "comment/retrieve",
+                data: {id:id, all:'1'},
+                beforeSend: function() {
+                    $(".spinner", $("#retrieveLink_"+id)).show()
+                },
+                complete: function() {
+                    $(".spinner", $("#retrieveLink_"+id)).hide();
+                    $("#"+id).data("follow", true);
+                },
+                success: function (data) {
+                    $("#comments_of_"+id).html(data);
+                },
+                error: function (data) {
+                    $("#retrieveLink_"+id).append("<span>something went wrong</span>");
+                }
+            });
+        }
+
+        function commentRemove(id) {
+            var selector = '#comment_'+id
+            $.ajax({
+                url: "message/remove",
+                data: {id:id},
+                success: function(data) {
+                    $(selector).parent().html(data)
+                },
+                error: function(data) {$(selector).html('something went wrong')}
+            });
+        }
+
+        function commentEdit(id) {
+            var selector = '#comment_'+id;
+            $.ajax({
+                url: "/earlyadopters/message/edit",
+                data: {id:id},
+                success: function(data) {
+                    $(selector).html(data);
+                    $(selector).siblings(".commentLinks").hide()
+                },
+                error: function(data) {$(selector).html('something went wrong')}
+            });
+            return false;
+        }
+
+
+        function entryRemove(id) {
+            var selector = '#'+id + " .entry-body";
+            $.ajax({
+                url: "/earlyadopters/feed/remove",
+                data: {id:id},
+                success: function(data) {
+                    $(selector).hide();
+                    var aDiv = $("<div>").addClass("entry-body").html(data);
+                    var clear = $('<div class="clearfix">&nbsp</div>');
+                    $("#"+id).append(aDiv).append(clear);
+                },
+                error: function(data) {$(selector).html('something went wrong')}
+            });
+        }
+        function restoreEntry(id) {
+            var selector = "#feed_"+id;
+            $.ajax({
+                url: "/earlyadopters/feed/restoreHiddenEntry",
+                data: {id:id, restore:'true'},
+                success: function(data) {
+                    swapWithContent("#"+id, data);
+                },
+                error: function(data) {
+                    $(selector).html("something went wrong");
+                }
+            });
+        }
+
+        function entryEdit(id) {
+            var selector = '#feed_'+id;
+            $.ajax({
+                url: "/earlyadopters/feed/edit",
+                data: {id:id},
+                success: function(data) {
+                    $(selector).html(data)
+
+                },
+                error: function(data) {$(selector).html('something went wrong')}
+            });
+        }
+
+        function showError(XMLHttpRequest,textStatus,errorThrown) {
+            $("#warningModal .modal-body p").html(XMLHttpRequest.responseText);
+            $("#warningModal").modal({show:true});
+            if (XMLHttpRequest.status == 401) {
+                $("#warningModal").on('hidden', function() {
+                    window.location.href="/earlyadopters/logout/index"
+                });
+            }
+        }
+
+    </script>
+    <script>
+
+    </script>
+    
+		<meta name="layout" content="bootstrap"/>
+    
+    
+	
+
+</head>
+
+<body>
+<span id="aSpinner" class="hide comment-spinner"><img src="/earlyadopters/static/images/gif/basket-spinner.gif"/></span>
+
+<button onclick="topFunction()" id="myBtn" title="Go to top">&nbsp;<i class="icon-arrow-up icon-white"> </i>&nbsp;</button>
+
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            
+            
+            <a class="btn btn-navbar sandwich">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+
+            <a href="/earlyadopters/" class="brand"><img src="/earlyadopters/static/images/frenfit-brand.png" /></a>
+            
+                
+                <ul class="nav pull-right">
+                    <li class="divider-vertical"/>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="{{ loggedUserName}}" style="position: relative">
+                            <img class="img-rounded" width="22" height="22" src="https://i.postimg.cc/Y9KJjD2g/IMG-20200531-211030824-1.jpg"/>
+                            
+                            
+                        </a>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                            <li><a href="/earlyadopters/user/settings"><i class="icon-cog"></i> Settings</a></li>
+                            <li><a href="/earlyadopters/followingRequest/index"><i class="icon-user"></i>&nbsp;Following requests</a></li>
+                            <li class="divider"></li>
+                            <li><a href="/earlyadopters/hidden"><i class="icon-eye-close"></i> Hidden feeds</a></li>
+                            <li><a href="/earlyadopters/trash/index"><i class="icon-trash"></i> Trash</a></li>
+                            <li class="divider"></li>
+                            <li><a href="/earlyadopters/logout/index"><i class="icon-off"></i> Log out</a></li>
+                        </ul>
+                    </li>
+                    <li class="divider-vertical"/>
+                    <li>
+                        <a href="/earlyadopters/messages/direct" style="position: relative">
+                            <img class="nav-avatar" src="/earlyadopters/static/images/icons/icon-grey-speech-bubbles.png" width="22" height="22"/>
+                            <span class="count hidden"><span class="count-inner"></span></span>
+                        </a>
+                    </li>
+                    <li class="divider-vertical"/>
+
+                </ul>
+                <div class="nav-collapse collapse">
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <span class="pull-right">
+                        <form action="/earlyadopters/search/index" method="post" class="navbar-form form-search" >
+  <input type="text" class="input-medium search-query" name="q" size="50" id="q" value="">
+  <button type="submit" class="btn"><i class="icon-search"></i></button>
+</form>
+
+                    </span>
+                </div><!--/.nav-collapse -->
+
+            
+            
+        </div>
+
+    </div>
+</div>
+<div id="sidemenu">
+    <div id="colPush" class="span0 hidden-desktop">
+        <ul class="nav nav-list">
+            <li><a href="/earlyadopters/">Home</a></li>
+            <li><a href="/earlyadopters/{{ loggedUserName}}">My feeds</a></li>
+            <li><a href="/earlyadopters/feed/discussions">My discussions</a></li>
+            <li><a href="/earlyadopters/bookmarks">Bookmarks</a></li>
+            <li><a href="/earlyadopters/f/best">Best of day</a></li>
+            <li class="divider"></li>
+            <li class="nav-header"><a href="#" onclick="return false;" data-toggle="collapse" data-target=".frenfbooks">:Lists</a></li>
+            <ul class="nav nav-list collapse frenfbooks">
+  
+
+                <li><a href="/earlyadopters/frenfBook/index">Edit</a> </li>
+            </ul>
+            <li class="divider"></li>
+            <li class="nav-header"><a href="#" onclick="return false;" data-toggle="collapse" data-target=".rooms">:Rooms</a></li>
+            <ul class="nav nav-list collapse rooms">
+                
+   
+     
+   
+
+
+{% for room in rooms %}
+   <li id="roomLink_{{ room.id }}">
+     <a href="/earlyadopters/{{ room.name }}">Frenf.it!
+     <br><small class="room-date"><em>{{ room.last_edit_date }}</em></small></a>
+   </li>
+{% endfor %}
+
+                <li><a href="/earlyadopters/room/index">Edit</a> </li>
+            </ul>
+            <li class="divider"></li>
+            <li><a href="/earlyadopters/search/index">Search</a></li>
+        </ul>
+    </div>
+</div>
+
+<div id="wrap">
+    <div class="container">
+        <div class="row-fluid">
+            <div  class="span4">
+                <p>Do it! Like it! Frenf it!</p>
+            </div>
+            <div class="span5">
+                
+            </div>
+            <div class="span3 hidden-phone">
+                <div class="progress">
+  <div class="bar" style="width: 86%;"><small>Evaluate World Peace</small></div>
+  <div class="bar bar-danger" style="width: 14%"></div>
+</div>
+            </div>
+        </div>
+        <hr class="hidden-phone">
+        
+	 <div class="row-fluid">
+      <div class="span9">
+        <h4>Bookmarks</h4>
+        
+          
+          
+          
+            
+          
+          
+        
+          
+          <div id="feed">
+{% for entry in entries %}
+  <div class="entry" id="{{ entry.id }}" data-follow=false>
+  <hr>
+
+  
+  
+
+  
+
+
+
+<span class="avatar-url pull-left">
+    <a href="{{ entry.userName }}">
+        <img class="media-object img-rounded img48" src="{{ entry.userAvatar }}" alt="avatar" onerror="imgNotFound(this);"/>
+    </a>
+    
+    {% if entry.private %}
+        <img class="specIcon img-rounded" src="/earlyadopters/static/images/icons/private.png" width="24" height="24"/>
+    {% endif %}
+    
+
+
+
+
+
+
+
+</span><!-- /.avatar-url -->
+<div class="entry-body {% if entry.private %}private{% endif %}">
+    <strong class="media-heading">
+        <a href="/earlyadopters/{{ entry.userName }}" data-id="{{ entry.userId }}" class="user">{{ entry.userFullName }}</a>
+    </strong>
+    
+    
+    <br/>
+    <span class="entry-text" id="feed_{{ entry.id }}">
+        
+            {{ entry.content }}
+        
+    </span>
+</div><!-- /entry-body -->
+
+
+
+    
+
+    <div class="entry-body">
+      <small class="postLinks">
+        <a href="/earlyadopters/p/{{ entry.userName }}/{{ entry.id }}">
+          {{ entry.date }}
+        </a> 
+
+      <span id="comment_link_{{ entry.id }}" class="">
+        -
+        <a href="#" class="comment-link" data-id="{{ entry.id }}">
+          Comment
+        </a>
+      </span>
+        
+          -
+          
+            <a href="#" class="hideEntry" data-id="{{ entry.id }}">
+              Hide
+            </a>
+          
+        
+        <span id="bookmark_{{ entry.id }}">
+            
+             -
+<a href="#" class="bookmark" data-id="{{ entry.id }}"><i class="icon icon-bookmark icon-gray"></i></a>
+-
+        </span>
+          
+  
+
+
+
+  
+    <span class="like" id="likes_{{ entry.id }}">
+      <a href="#" class="like" data-cid="{{ entry.id }}">
+         <i class="icon icon-like"></i>
+      </a>
+
+      <span class="likers hide"></span>
+      <span id="post_likesCounter_{{ entry.id }}" class="">[ <a href="#" class="likesCounter" data-id="{{ entry.id }}" data-retrieve="like">10</a> ]</span>
+
+      -
+      <a href="#" class="dislike" data-cid="{{ entry.id }}">
+      <i class="icon icon-dislike"></i>
+      </a>
+
+      <span class="dislikers hide"></span>
+      <span id="post_dislikesCounter_{{ entry.id }}" class="hide">[ <a href="#" class="likesCounter" data-id="{{ entry.id }}" data-retrieve="dislike">0</a> ]</span>
+
+  </span>
+
+
+        <span class="hide">
+          - (<a href="javascript:;" onclick="entryEdit('{{ entry.id }}')">Edit</a> | <a href="javascript:;" onclick="entryRemove('{{ entry.id }}')">Remove</a>)
+        </span>
+
+        <span class="other-link dropdown">
+            - <a class="dropdown-toggle actions" data-toggle="dropdown" href="#" data-id="{{ entry.id }}">More...<b class="caret"></b></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+            </ul>
+        </span>
+
+      </small>
+
+  <div id="comments_of_{{ entry.id }}">
+        
+        
+          <span class="comments">
+	
+
+
+
+
+    
+
+  {% if entry.comments[0] %}
+  <div class="comment-body">
+    <div class="comment-content">
+      
+      
+      <i class="icon icon-comment commentLinks" title="{{ entry.comments[0].date }}"></i> 
+      <span class="comment comment-text" id="comment_{{ entry.comments[0].id }}">
+        
+          {{ entry.comments[0].content }}
+        
+      </span>
+        
+      <span class="commentLinks"> -
+
+
+          <a href="/earlyadopters/{{ entry.comments[0].userName }}" class="user" data-id="{{ entry.comments[0].id }}">
+             {{ entry.comments[0].userName }}
+          </a>
+
+        <small> 
+           
+          <span class="separator"> - </span>
+          <span claass="like" id="comment_likes_{{ entry.comments[0].id }}">
+            
+  
+
+
+
+  
+    <span class="like" id="likes_{{ entry.comments[0].id }}">
+      <a href="#" class="like" data-cid="{{ entry.comments[0].id }}">
+         <i class="icon icon-like"></i>
+      </a>
+
+      <span class="likers hide"></span>
+      <span id="comment_likesCounter_{{ entry.comments[0].id }}" class="hide">[ <a href="#" class="likesCounter" data-id="{{ entry.comments[0].id }}" data-retrieve="like">0</a> ]</span>
+
+      -
+      <a href="#" class="dislike" data-cid="{{ entry.comments[0].id }}">
+      <i class="icon icon-dislike"></i>
+      </a>
+
+      <span class="dislikers hide"></span>
+      <span id="comment_dislikesCounter_{{ entry.comments[0].id }}" class="hide">[ <a href="#" class="likesCounter" data-id="{{ entry.comments[0].id }}" data-retrieve="dislike">0</a> ]</span>
+
+  </span>
+
+          </span>
+
+            <span class="hide">
+              <span class="separator"> - </span> (<a href="javascript:;" onclick="commentEdit('{{ entry.comments[0].id }}')">Edit</a> | <a href="javascript:;" onclick="commentRemove('{{ entry.comments[0].id }}')">Remove</a>)
+            </span>
+
+        </small>
+      </span><!-- /comment links -->
+        
+    </div>
+  </div>
+  {% endif %}
+
+	<span id="retrieveLink_{{ entry.id }}" class="retrieveLink">
+		<span id="othercomments_{{ entry.id }}">
+  		
+
+
+
+
+		</span>
+		
+
+
+
+
+    
+  {% for comment in entry.comments.slice(1) %}
+  <div class="comment-body">
+    <div class="comment-content">
+      
+      
+      <i class="icon icon-comment commentLinks" title="{{ comment.date }}"></i> 
+      <span class="comment comment-text" id="comment_{{ comment.id }}">
+        
+          {{ comment.content }}
+        
+      </span>
+        
+      <span class="commentLinks"> -
+
+
+          <a href="/earlyadopters/{{ comment.userName }}" class="user" data-id="{{ comment.userId }}">
+             {{ comment.userFullName }}
+          </a>
+
+        <small> 
+           
+          <span class="separator"> - </span>
+          <span claass="like" id="comment_likes_{{ comment.id }}">
+            
+  
+
+
+
+  
+    <span class="like" id="likes_{{ comment.id }}">
+      <a href="#" class="like" data-cid="{{ comment.id }}">
+         <i class="icon icon-like"></i>
+      </a>
+
+      <span class="likers hide"></span>
+      <span id="comment_likesCounter_{{ comment.id }}" class="">[ <a href="#" class="likesCounter" data-id="{{ comment.id }}" data-retrieve="like">{{ comment.likes }}</a> ]</span>
+
+      -
+      <a href="#" class="dislike" data-cid="{{ comment.id }}">
+      <i class="icon icon-dislike"></i>
+      </a>
+
+      <span class="dislikers hide"></span>
+      <span id="comment_dislikesCounter_{{ comment.id }}" class="hide">[ <a href="#" class="likesCounter" data-id="{{ comment.id }}" data-retrieve="dislike">{{ comment.dislikes }}</a> ]</span>
+
+  </span>
+
+          </span>
+
+            <span class="hide">
+              <span class="separator"> - </span> (<a href="javascript:;" onclick="commentEdit('{{ comment.id }}')">Edit</a> | <a href="javascript:;" onclick="commentRemove('{{ comment.id }}')">Remove</a>)
+            </span>
+
+        </small>
+      </span><!-- /comment links -->
+        
+    </div>
+  </div>
+  {% endfor %}
+
+	</span>
+</span>
+
+        
+      </div>
+
+      <span class="commentBox hide">
+        
+  <div>
+
+	<textarea id="commentBox_{{ entry.id }}" class="input-xxlarge animated commentBox" name="comment" maxlength="1500" ></textarea><br>
+	<a href="#" class="btn btn-mini btn-primary comment-button" data-eid="{{ entry.id }}">Comment</a> 
+	<a href="javascript:;" class="btn btn-mini" onclick="hideCommentBox(&#39;{{ entry.id }}&#39;)">Cancel</a>
+  </div>
+
+
+      </span>
+      
+        <a href="javascript:;" class="addComment " onclick="showCommentBox(&#39;{{ entry.id }}&#39;)">Comment</a>
+      
+        <span class="addComment hidden">Comments are closed.</span>
+    </div>
+
+</div><!-- /.media -->
+{% endfor %}
+
+</div>
+        
+      </div>
+      <div class="span3">
+        
+
+
+<div class="hidden-phone">
+    
+        <script>
+            $(function(){
+                $.ajax({
+                    url: "/earlyadopters/invitation/getInvitationsCount",
+                    success: function(data) {
+                        if(data != "0") {
+                            $("#invites").html(data)
+                        }
+                    }
+                });
+            });
+        </script>
+        <div class="well">
+            <ul class="nav nav-list ">
+                
+                <li class="nav-header">Ciao {{ loggedUserName}}</li>
+                
+                
+                <li><a href="/earlyadopters/{{ loggedUserName}}"><i class="icon-pencil"></i> My feeds</a>
+                <li><a href="/earlyadopters/feed/discussions"><i class="icon-comment-black"></i> My discussions</a>
+                
+                
+                <li><a href="/earlyadopters/bookmarks"><i class="icon-bookmark"></i> Bookmarks</a></li>
+                
+                <li class="divider"></li>
+                <li><a href="http://www.frenf.it/faq" target="_blank"><i class="icon icon-book"></i> Read me</a></li>
+                <li class="divider invitation"></li>
+                <li class="invitation"><a href="/earlyadopters/invitation/index"><i class="icon-hand-right"></i><b> <span id="invites"></span> Invitations</b></a></li>
+                <li class="divider"></li>
+                
+
+                <li><a href="/earlyadopters/f/best"><i class="icon-star"></i> Best of day</a></li>
+                <li><a href="/earlyadopters/f/world"><i class="icon-globe"></i> Public posts - Everything</a></li>
+                <li><a href="/earlyadopters/f/rooms"><i class="icon-list-alt"></i> Public posts - Rooms</a></li>
+            </ul>
+        </div>
+        
+        <div class="well">
+            <ul class="nav nav-list frenfBookLinks">
+                <li class="nav-header">
+                    <a href="/earlyadopters/frenfBook/index">FrenfBooks</a>
+                </li>
+                <li>
+                    <a href="/earlyadopters/">Home</a>
+                    
+                    
+                    
+                    
+
+                    
+                    
+                    
+
+                </li>
+                
+  
+
+
+            </ul>
+        </div>
+        <div class="well">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                    <a href="/earlyadopters/room/index">Rooms </a>
+                </li>
+                
+
+
+            </ul>
+        </div>
+    
+    
+        
+            
+                
+            
+        
+        
+            
+        
+        
+    
+    <div class="well">
+        <p>Support frenf.it with a donation!</p>
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+            <input type="hidden" name="cmd" value="_s-xclick">
+            <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
+            <input type="image" src="https://www.paypalobjects.com/it_IT/IT/i/btn/btn_donateCC_LG.gif" border="0"
+                   name="submit" alt="PayPal - Il metodo rapido, affidabile e innovativo per pagare e farsi pagare.">
+            <img alt="" border="0" src="https://www.paypalobjects.com/it_IT/i/scr/pixel.gif" width="1" height="1">
+        </form>
+    </div>
+</div>     
+      </div>
+    </div>
+	
+
+    </div><!-- /.container -->
+    <div id="push"></div>
+</div>   
+<div id="footer">
+    <div class="container">
+        <div class="row-fluid credit">
+            <div class="span4 hidden-phone">
+                We are 2425 and still growing!
+            </div>
+            <div class="span4 hidden-phone">
+                Frenfi version 0.04a.09.13
+            </div>
+            <div class="span4 pull-right">
+                <a href="http://www.frenf.it/tos">ToS</a> -
+<a href="https://www.iubenda.com/privacy-policy/191999"  target="_blank" title="Privacy Policy">Privacy Policy</a> <script type="text/javascript">(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);</script> - 
+            <a href="/earlyadopters/bookmarklet/index">Bookmarklet</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/earlyadopters/static/bundle-bundle_application_defer.js" type="text/javascript" ></script>
+
+
+
+<div id="warningModal" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 class="title">
+            <span class="warning-message">Warning!</span>
+            <span class="custom-message"></span>
+        </h3>
+    </div>
+    <div class="modal-body">
+        <p></p>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Close</a>
+    </div>
+</div>
+
+<div class="pagination">
+  
+    
+    
+  
+  <ul>
+
+    
+      
+    
+
+    <li class="{% if prevPage == false %}disabled{% endif %}"><a href="/earlyadopters/bookmarks?page=0">Newer</a></li>
+    <li class="{% if nextPage == false %}disabled{% endif %}"><a href="/earlyadopters/bookmarks?page=2">Older</a></li>
+  </ul>
+</div>
+</body>
+
+</html>

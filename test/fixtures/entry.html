@@ -1,0 +1,132 @@
+<div class="entry" id="{{ id }}" data-follow=false>
+  <hr>
+
+  
+  
+
+  
+
+
+
+<span class="avatar-url pull-left">
+    <a href="{{ user.name }}">
+        <img class="media-object img-rounded img48" src="{{ user.avatar }}" alt="avatar" onerror="imgNotFound(this);"/>
+    </a>
+    
+        {% if user.private %}
+        <img class="specIcon img-rounded" src="/earlyadopters/static/images/icons/private.png" width="24" height="24"/>
+        {% endif %}
+    
+
+
+
+
+
+
+
+</span><!-- /.avatar-url -->
+<div class="entry-body private">
+    <strong class="media-heading">
+        <a href="/earlyadopters/{{ user.name }}" data-id="188" class="user">loi</a>
+    </strong>
+    
+    
+    <br/>
+    <span class="entry-text" id="feed_{{ id }}">
+        
+            {{ content }}
+        
+    </span>
+    <div class="clearfix thumbnails">
+        
+        <div id="other_thumbnails_{{ id }}" style="clear: both">
+            <span class="spinner hide"><img src="/earlyadopters/static/images/gif/basket-spinner.gif"/></span>
+            
+        </div>
+    </div>
+</div><!-- /entry-body -->
+
+
+
+    
+
+    <div class="entry-body">
+      <small class="postLinks">
+        <a href="/earlyadopters/p/{{ user.name }}/{{ id }}">
+          {{ date }}
+        </a> 
+
+      <span id="comment_link_{{ id }}" class="">
+        -
+        <a href="#" class="comment-link" data-id="{{ id }}">
+          Comment
+        </a>
+      </span>
+        
+        <span id="bookmark_{{ id }}">
+            
+             -
+<a href="#" class="bookmark" data-id="{{ id }}"><i class="icon icon-bookmark icon-gray"></i></a>
+-
+        </span>
+          
+  
+
+
+ 
+  <span id="likes_{{ id }}">
+    <i class="icon icon-like"></i>
+
+      <span class="likers hide"></span>
+      <span id="post_likesCounter_{{ id }}" class="hide">[ <a href="#" class="likesCounter" data-id="{{ id }}" data-retrieve="like">{{ likes }}</a> ]</span>
+
+      -
+    <i class="icon icon-dislike"></i>
+
+      <span class="dislikers hide"></span>
+      <span id="post_dislikesCounter_{{ id }}" class="hide">[ <a href="#" class="likesCounter" data-id="{{ id }}" data-retrieve="dislike">{{ dislikes }}</a> ]</span>
+
+  </span>
+
+
+        <span class="editLinks">
+          - (<a href="javascript:;" onclick="entryEdit('{{ id }}')">Edit</a> | <a href="javascript:;" onclick="entryRemove('{{ id }}')">Remove</a>)
+        </span>
+
+        <span class="other-link dropdown">
+            - <a class="dropdown-toggle actions" data-toggle="dropdown" href="#" data-id="{{ id }}">More...<b class="caret"></b></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+            </ul>
+        </span>
+
+      </small>
+
+  <div id="comments_of_{{ id }}">
+        
+          <span class="comments">
+            
+
+
+
+          </span>
+        
+        
+      </div>
+
+      <span class="commentBox hide">
+        
+  <div>
+
+	<textarea id="commentBox_{{ id }}" class="input-xxlarge animated commentBox" name="comment" maxlength="1500" ></textarea><br>
+	<a href="#" class="btn btn-mini btn-primary comment-button" data-eid="{{ id }}">Comment</a> 
+	<a href="javascript:;" class="btn btn-mini" onclick="hideCommentBox(&#39;{{ id }}&#39;)">Cancel</a>
+  </div>
+
+
+      </span>
+      
+        <span class="addComment hidden">Comments are closed.</span>
+    </div>
+
+</div><!-- /.media -->
+
