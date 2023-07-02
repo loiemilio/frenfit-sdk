@@ -5,6 +5,7 @@ import { parseRoomsPage, sendRoomPageRequest } from './page';
 import { AddRoomRequest, EditRoomRequest as EditRoomRequest } from './types';
 
 export default './endpoints';
+export * from './subscribers';
 
 export const addRoom = async (request: AddRoomRequest) => {
   const result = await sendRoomPageRequest(endpoints.addRoom, request);
