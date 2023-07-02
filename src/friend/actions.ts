@@ -22,6 +22,13 @@ const actOnFollowerRequests = async (url: URL, ids: number[]) => {
 export const approveFollowerRequests = async (ids: number[]) =>
   actOnFollowerRequests(endpoints.approveFollowerRequests, ids);
 
+export const blockFriend = (id: number) =>
+  ffetch(endpoints.block(id), {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  });
+
 export const ignoreFollowerRequests = async (ids: number[]) =>
   actOnFollowerRequests(endpoints.ignoreFollowerRequests, ids);
 
@@ -49,6 +56,13 @@ export const follow = async (id: number) => {
     privateFeed,
   } as FollowResponse;
 };
+
+export const unblockFriend = (id: number) =>
+  ffetch(endpoints.unblock(id), {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  });
 
 export const unfollow = async (id: number) => {
   const response = await ffetch(endpoints.unfollow(id), {

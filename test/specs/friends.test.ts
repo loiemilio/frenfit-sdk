@@ -6,6 +6,7 @@ import { setAuthCookies } from '@sdk/auth';
 import feedEndpoints from '@sdk/feed/endpoints';
 import {
   approveFollowerRequests,
+  blockFriend,
   follow,
   getFriend,
   getHovercard,
@@ -307,6 +308,22 @@ describe('friends', () => {
     const id = Math.ceil(Math.random() * 1000);
     fetchMock.post(endpoints.removeFollowerRequests.toString(), {});
     await removeFollowerRequests([id]);
+
+    expect(fetchMock.calls()).toHaveLength(1);
+  });
+
+  it('can block a friend', async () => {
+    const id = Math.ceil(Math.random() * 1000);
+    fetchMock.get(endpoints.block(id).toString(), {});
+    await blockFriend(id);
+
+    expect(fetchMock.calls()).toHaveLength(1);
+  });
+
+  it('can unblock a friend', async () => {
+    const id = Math.ceil(Math.random() * 1000);
+    fetchMock.get(endpoints.unblock(id).toString(), {});
+    await unblockFriend(id);
 
     expect(fetchMock.calls()).toHaveLength(1);
   });
