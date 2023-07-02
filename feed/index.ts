@@ -1,12 +1,13 @@
 import { apiURL, ffetch, frontendURL } from '@support/client';
 import { UnexpectedResponseException } from '@support/exceptions';
 
-import { EntryResponse } from './types';
+import { EntryResponse, TargetFeed } from './types';
 import { decodeEntry } from './utils';
 
 export const feedEndpoints = {
-  entry: (id: number) => apiURL('entry/{id}', { id }),
   bookmark: (entryId: number) => frontendURL('bookmark/bookmark/?id={entryId}', { entryId }),
+  emptyRoom: frontendURL('empty'),
+  entry: (id: number) => apiURL('entry/{id}', { id }),
 };
 
 export const toggleBookmark = async (entryId: number) => {
@@ -42,4 +43,31 @@ export const getEntry = async (id: number) => {
   entry.origin ||= undefined;
 
   return decodeEntry(entry);
+};
+
+export const listRecipients = async () => {
+  const emptyRoomResponse = await ffetch(feedEndpoints.emptyRoom);
+  const pageContent = await emptyRoomResponse.text();
+
+  const pattern = /var\s+flwz\s*=\s*(?<recipients>\{[^}]+\});+/gm;
+  const match = pattern.exec(pageContent);
+  if (!match?.groups?.recipients) {
+    throw new UnexpectedResponseException(emptyRoomResponse, {
+      reason: 'Page does not contain flwz list',
+    });
+  }
+
+  const recipients = JSON.parse(match.groups.recipients) as Record<string, number>;
+
+  return Object.entries(recipients).map(([name, id]) => {
+    const pattern = /^(?<isRoom><i>)?(?<fullname>.*)\s+\((?<name>[^)]+)\s*\)/;
+    const match = pattern.exec(name);
+
+    return {
+      id,
+      name: match?.groups?.name,
+      fullname: match?.groups?.fullname,
+      isRoom: !!match?.groups?.isRoom,
+    } as TargetFeed;
+  });
 };

@@ -15,3 +15,10 @@ export type FeedInfoResponse<T> = {
   avatarUrl?: string;
   email?: string;
 };
+
+export type TargetFeed = {
+  fullname: string;
+  name: string;
+  id: number;
+  isRoom: boolean;
+};
