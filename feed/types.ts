@@ -1,4 +1,4 @@
-import { Message } from '../../types';
+import { FeedPath, Message } from '../../types';
 
 export type AddEntryRequest = {
   recipientIds?: number[];
@@ -25,6 +25,17 @@ export type FeedInfoResponse<T> = {
   type: T;
   avatarUrl?: string;
   email?: string;
+};
+
+export type ListEntriesRequest = {
+  feed: FeedPath;
+  page?: number;
+};
+
+export type ListEntriesResponse = {
+  entries?: Message[];
+  ids: number[];
+  page: number;
 };
 
 export type TargetFeed = {
