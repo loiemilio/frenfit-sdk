@@ -27,7 +27,9 @@ export default {
       offset: 24 * (page - 1),
     }),
   myRooms: frontendURL('room/index'),
+  silence: (id: number) => frontendURL('room/silence/{id}', { id }),
   toggleInHome: (id: number, inHome: 'true' | 'false') =>
     frontendURL('room/toggleHome?id={id}&inHome={inHome}', { id, inHome }),
+  unsilence: (id: number) => frontendURL('room/desilence/{id}', { id }),
   unsubscribe: frontendURL('room/unsubscribe'),
 };

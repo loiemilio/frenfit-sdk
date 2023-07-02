@@ -4,6 +4,7 @@ import endpoints from './endpoints';
 import { parseRoomsPage, sendRoomPageRequest } from './page';
 import { AddRoomRequest, EditRoomRequest as EditRoomRequest } from './types';
 
+export * from './actions';
 export default './endpoints';
 export * from './subscribers';
 
