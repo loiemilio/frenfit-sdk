@@ -1,3 +1,5 @@
+import type { User } from '@frenfit-types';
+
 export type AddRoomRequest = {
   username: string;
   title: string;
@@ -7,3 +9,10 @@ export type AddRoomRequest = {
 };
 
 export type EditRoomRequest = AddRoomRequest & { id: number };
+
+export type listSubscriberResponse = {
+  page: number;
+  lastPage: number;
+  subscribers: User[];
+  total: number;
+};
