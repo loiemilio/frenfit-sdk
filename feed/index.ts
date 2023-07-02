@@ -1,38 +1,19 @@
-import { apiURL, ffetch, frontendURL } from '@support/client';
+import { ffetch } from '@support/client';
 import { FrenfitException, UnexpectedResponseException } from '@support/exceptions';
 
-import { AddEntryRequest, EditEntryRequest, EntryResponse, TargetFeed } from './types';
+import { toggleBookmark } from './bookmark';
+import endpoints from './endpoints';
+import { AddEntryRequest, EditEntryRequest, EntryResponse } from './types';
 import { decodeEntry } from './utils';
 
-export const feedEndpoints = {
-  bookmark: (entryId: number) => frontendURL('bookmark/bookmark/?id={entryId}', { entryId }),
-  deleteEntry: (entryId: number) => frontendURL('feed/remove?id={entryId}', { entryId }),
-  editEntry: frontendURL('message/editEntry'),
-  emptyRoom: frontendURL('empty'),
-  entry: (id: number) => apiURL('entry/{id}', { id }),
-  postEntry: frontendURL('message/postToFrenfi'),
-  restoreEntry: (entryId: number) => frontendURL('feed/restore/{entryId}', { entryId }),
-};
+export * from './bookmark';
+export default './endpoints';
+export * from './recipients';
 
-export const toggleBookmark = async (entryId: number) => {
-  const response = await ffetch(feedEndpoints.bookmark(entryId));
-  const text = await response.text();
-
-  const pattern = /class="icon icon-bookmark (?<notBookmarked>icon-gray)?/g;
-  const match = pattern.exec(text);
-
-  if (!match?.groups) {
-    throw new UnexpectedResponseException(response, {
-      error: `Response does not match ${String(pattern)}`,
-      entryId,
-    });
-  }
-
-  return !match.groups.notBookmarked;
-};
+const ALLOWED_FILE_TYPES = ['image/png', 'image/x-png', 'image/gif', 'image/jpeg'];
 
 export const deleteEntry = (id: number) => {
-  return ffetch(feedEndpoints.deleteEntry(id), {
+  return ffetch(endpoints.deleteEntry(id), {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
     },
@@ -44,7 +25,7 @@ export const editEntry = async (id: number, request: EditEntryRequest) => {
   body.set('id', String(id));
   body.set('message', request.message);
 
-  await ffetch(feedEndpoints.editEntry, {
+  await ffetch(endpoints.editEntry, {
     method: 'POST',
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
@@ -57,7 +38,7 @@ export const editEntry = async (id: number, request: EditEntryRequest) => {
 
 export const getEntry = async (id: number) => {
   const [response, bookmarked] = await Promise.all([
-    ffetch(feedEndpoints.entry(id)),
+    ffetch(endpoints.entry(id)),
     toggleBookmark(id).then(() => toggleBookmark(id)),
   ]);
 
@@ -72,35 +53,6 @@ export const getEntry = async (id: number) => {
 
   return decodeEntry(entry);
 };
-
-export const listRecipients = async () => {
-  const emptyRoomResponse = await ffetch(feedEndpoints.emptyRoom);
-  const pageContent = await emptyRoomResponse.text();
-
-  const pattern = /var\s+flwz\s*=\s*(?<recipients>\{[^}]+\});+/gm;
-  const match = pattern.exec(pageContent);
-  if (!match?.groups?.recipients) {
-    throw new UnexpectedResponseException(emptyRoomResponse, {
-      reason: 'Page does not contain flwz list',
-    });
-  }
-
-  const recipients = JSON.parse(match.groups.recipients) as Record<string, number>;
-
-  return Object.entries(recipients).map(([name, id]) => {
-    const pattern = /^(?<isRoom><i>)?(?<fullname>.*)\s+\((?<name>[^)]+)\s*\)/;
-    const match = pattern.exec(name);
-
-    return {
-      id,
-      name: match?.groups?.name,
-      fullname: match?.groups?.fullname,
-      isRoom: !!match?.groups?.isRoom,
-    } as TargetFeed;
-  });
-};
-
-const ALLOWED_FILE_TYPES = ['image/png', 'image/x-png', 'image/gif', 'image/jpeg'];
 
 export const postEntry = async (request: AddEntryRequest) => {
   const body = new FormData();
@@ -117,7 +69,7 @@ export const postEntry = async (request: AddEntryRequest) => {
     body.append('filesToUpload', f);
   });
 
-  const response = await ffetch(feedEndpoints.postEntry, {
+  const response = await ffetch(endpoints.postEntry, {
     method: 'POST',
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
@@ -140,7 +92,7 @@ export const postEntry = async (request: AddEntryRequest) => {
 };
 
 export const restoreEntry = async (id: number) => {
-  await ffetch(feedEndpoints.restoreEntry(id), {
+  await ffetch(endpoints.restoreEntry(id), {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
     },

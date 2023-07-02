@@ -1,14 +1,11 @@
-import { apiURL, clearData, ffetch, frontendURL } from '@support/client';
+import { clearData, ffetch } from '@support/client';
 import { InvalidCredentialsException, UnexpectedResponseException } from '@support/exceptions';
 import store, { ME_KEY } from '@support/store';
 
+import endpoints from './endpoints';
 import { LoginRequest, MeResponse } from './types';
 
-export const authEndpoints = {
-  login: frontendURL('j_spring_security_check?id=loginForm'),
-  logout: frontendURL('j_spring_security_logout'),
-  me: apiURL('feedinfo'),
-};
+export default './endpoints';
 
 export const login = async (request: LoginRequest) => {
   await clearData();
@@ -17,7 +14,7 @@ export const login = async (request: LoginRequest) => {
   body.set('j_username', request.username);
   body.set('j_password', request.password);
 
-  const loginResponse = await ffetch(authEndpoints.login, {
+  const loginResponse = await ffetch(endpoints.login, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -41,14 +38,14 @@ export const login = async (request: LoginRequest) => {
 };
 
 export const logout = async () => {
-  await ffetch(authEndpoints.logout);
+  await ffetch(endpoints.logout);
 };
 
-export const me = async (fetch = false) => {
+export const getMe = async (fetch = false) => {
   let me = store.get(ME_KEY) as MeResponse | undefined;
 
   if (!me || fetch) {
-    const meResponse = await ffetch(authEndpoints.me);
+    const meResponse = await ffetch(endpoints.me);
     me = (await meResponse.json()) as MeResponse;
 
     store.set(ME_KEY, me);
