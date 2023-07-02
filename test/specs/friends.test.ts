@@ -5,14 +5,18 @@ import { Liquid } from 'liquidjs';
 import { setAuthCookies } from '@sdk/auth';
 import feedEndpoints from '@sdk/feed/endpoints';
 import {
+  approveFollowerRequests,
   follow,
   getFriend,
   getHovercard,
+  ignoreFollowerRequests,
   listBlocked,
   listFollowerRequests,
   listFollowers,
   listFollowing,
   listFollowingRequests,
+  removeFollowerRequests,
+  unblockFriend,
   unfollow,
 } from '@sdk/friend';
 import endpoints from '@sdk/friend/endpoints';
@@ -273,6 +277,38 @@ describe('friends', () => {
         username: mock.name,
       })),
     );
+  });
+
+  it('can approve friend requests', async () => {
+    const ids = Array.from({ length: Math.ceil(Math.random() * 3) }, () => Math.ceil(Math.random() * 1000));
+    fetchMock.post(endpoints.approveFollowerRequests.toString(), ids, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+
+    const responseIds = await approveFollowerRequests(ids);
+    expect(responseIds).toEqual(ids);
+  });
+
+  it('can ignore friend requests', async () => {
+    const ids = Array.from({ length: Math.ceil(Math.random() * 3) }, () => Math.ceil(Math.random() * 1000));
+    fetchMock.post(endpoints.ignoreFollowerRequests.toString(), ids, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+
+    const responseIds = await ignoreFollowerRequests(ids);
+    expect(responseIds).toEqual(ids);
+  });
+
+  it('can remove a follower request', async () => {
+    const id = Math.ceil(Math.random() * 1000);
+    fetchMock.post(endpoints.removeFollowerRequests.toString(), {});
+    await removeFollowerRequests([id]);
+
+    expect(fetchMock.calls()).toHaveLength(1);
   });
 
   it('can follow a friend', async () => {

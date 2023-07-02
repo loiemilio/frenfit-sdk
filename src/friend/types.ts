@@ -5,6 +5,10 @@ export type FollowResponse = {
   privateFeed: boolean;
 };
 
+export type FollowerRequestActionResponse = {
+  id: number;
+}[];
+
 export type FollowersResponse = {
   user: User;
   usersList: User[];
