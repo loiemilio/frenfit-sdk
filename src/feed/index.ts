@@ -1,15 +1,16 @@
-import { ffetch } from '@support/client';
+import { ffetch, frontendURL } from '@support/client';
 import { FrenfitException, UnexpectedResponseException } from '@support/exceptions';
 
 import { toggleBookmark } from './bookmark';
 import endpoints from './endpoints';
-import { AddEntryRequest, EditEntryRequest, EntryResponse } from './types';
+import { AddEntryRequest, EditEntryRequest, EntryResponse, ListEntriesRequest, ListEntriesResponse } from './types';
 import { decodeEntry } from './utils';
 
 export * from './bookmark';
 export default './endpoints';
 export * from './reactions';
 export * from './recipients';
+export * from './types';
 
 const ALLOWED_FILE_TYPES = ['image/png', 'image/x-png', 'image/gif', 'image/jpeg'];
 
@@ -68,6 +69,36 @@ export const getEntry = async (
   entry.origin ||= undefined;
 
   return decodeEntry(entry);
+};
+
+export const listEntries = async (request: ListEntriesRequest) => {
+  const { ids } = await listEntryIds(request);
+
+  const entries = await Promise.all(ids.map(id => getEntry(id)));
+
+  return {
+    ids,
+    entries,
+    page: request.page || 0,
+  } as ListEntriesResponse;
+};
+
+export const listEntryIds = async (request: ListEntriesRequest) => {
+  const url = frontendURL(request.feed);
+  request.page && url.searchParams.set('page', String(request.page));
+
+  const response = await ffetch(url);
+
+  const text = await response.text();
+  const pattern = /"entry"\s+id="(\d+)"/gm;
+
+  const match = text.matchAll(pattern);
+  const ids = [...match].map(([, id]) => parseInt(id, 10));
+
+  return {
+    ids,
+    page: request.page || 0,
+  } as ListEntriesResponse;
 };
 
 export const postEntry = async (request: AddEntryRequest) => {
