@@ -8,6 +8,22 @@ import endpoints from './endpoints';
 
 export default './endpoints';
 
+export const displayRoomEntriesInHome = async (id: number) => {
+  await ffetch(endpoints.toggleInHome(id, 'true'), {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  });
+};
+
+export const hideRoomEntriesFromHome = async (id: number) => {
+  await ffetch(endpoints.toggleInHome(id, 'false'), {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  });
+};
+
 export const listMyRooms = async () => {
   const myRoomsResponse = await ffetch(endpoints.myRooms);
   const text = await myRoomsResponse.text();
