@@ -2,7 +2,28 @@ import { ffetch } from '@support/client';
 import { UnexpectedResponseException } from '@support/exceptions';
 
 import endpoints from './endpoints';
-import { FollowResponse } from './types';
+import { FollowResponse, FollowerRequestActionResponse } from './types';
+
+const actOnFollowerRequests = async (url: URL, ids: number[]) => {
+  const body = new URLSearchParams();
+  ids.forEach(id => body.append('follower', String(id)));
+
+  const response = await ffetch(url, {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+    body,
+  });
+
+  return (await response.json()) as FollowerRequestActionResponse;
+};
+
+export const approveFollowerRequests = async (ids: number[]) =>
+  actOnFollowerRequests(endpoints.approveFollowerRequests, ids);
+
+export const ignoreFollowerRequests = async (ids: number[]) =>
+  actOnFollowerRequests(endpoints.ignoreFollowerRequests, ids);
 
 export const follow = async (id: number) => {
   const response = await ffetch(endpoints.follow(id), {
@@ -43,3 +64,6 @@ export const unfollow = async (id: number) => {
     });
   }
 };
+
+export const removeFollowerRequests = async (ids: number[]) =>
+  actOnFollowerRequests(endpoints.removeFollowerRequests, ids);
