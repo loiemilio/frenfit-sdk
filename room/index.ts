@@ -1,5 +1,7 @@
-import { ffetch } from '@support/client';
+import { ffetch, frontendURL } from '@support/client';
+import { NotImplementedException } from '@support/exceptions';
 
+import { Room, RoomStatus } from '../../types';
 import endpoints from './endpoints';
 import { parseRoomsPage, sendRoomPageRequest } from './page';
 import { AddRoomRequest, EditRoomRequest as EditRoomRequest } from './types';
@@ -21,6 +23,51 @@ export const displayRoomEntriesInHome = async (id: number) => {
       'X-Requested-With': 'XMLHttpRequest',
     },
   });
+};
+
+export const getRoom = () => {
+  throw new NotImplementedException("This is tough! It's all scraping from the page room");
+
+  // const response = await ffetch(frontendURL(encodeURIComponent(name)));
+  // const text = await response.text();
+
+  // let [, roomInfo] = text.split('id="roomHeader"');
+  // [roomInfo] = roomInfo.split('id="subscribers"');
+
+  // const imgPattern = /<img[^>]*\ssrc="\/?(?<image>[^"]+)"/g;
+  // const match = imgPattern.exec(roomInfo);
+
+  // let avatar = match?.groups?.image as string;
+  // avatar = avatar?.startsWith(configuration.earlyAdoptersPath) ? frontendURL(avatar || '').href : avatar;
+
+  // console.log(avatar);
+
+  // {
+  //   id: number;
+  //   admin: boolean;
+  //   avatar: string;
+  //   inList: boolean;
+  //   locked: boolean;
+  //   silenced?: RoomStatus;
+  //   name: string;
+  //   title: string;
+  // }
+};
+
+export const silenceRoomStatus = async (room: Room) => {
+  const response = await ffetch(frontendURL(encodeURIComponent(room.name)));
+
+  const text = await response.text();
+
+  if (text.includes(`/room/silence/${room.id}`)) {
+    return RoomStatus.notSilenced;
+  }
+
+  if (text.includes(`/room/desilence/${room.id}`)) {
+    return RoomStatus.silenced;
+  }
+
+  return undefined;
 };
 
 export const editRoom = async (request: EditRoomRequest) => {
