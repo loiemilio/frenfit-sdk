@@ -2,6 +2,11 @@ import { frontendURL } from '@support/client';
 
 export default {
   addRoom: frontendURL('room/save'),
+  approveSubscribeRequest: (roomId: number, userId: number) =>
+    frontendURL('room/approve?frenf={userId}&roomId={roomId}', {
+      roomId,
+      userId,
+    }),
   editRoom: frontendURL('room/update'),
   listIgnoredRequests: (id: number, page = 1) =>
     frontendURL('room/getIgnoredRequests?id={id}&offset={offset}&max=24&page={page}', {
@@ -24,4 +29,5 @@ export default {
   myRooms: frontendURL('room/index'),
   toggleInHome: (id: number, inHome: 'true' | 'false') =>
     frontendURL('room/toggleHome?id={id}&inHome={inHome}', { id, inHome }),
+  unsubscribe: frontendURL('room/unsubscribe'),
 };
