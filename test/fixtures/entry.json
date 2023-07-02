@@ -1,0 +1,53 @@
+{
+    "entry": {
+        "bookmarked": null,
+        "class": "it.senape.ff.dto.MessageDto",
+        "commenters": [],
+        "commentersAsList": [],
+        "comments": [
+        ],
+        "commentsClosed": false,
+        "dateCreated": "2024-03-08T19:39:09Z",
+        "dislikes": 0,
+        "entryCounter": null,
+        "firstComment": null,
+        "id": {{ entryId }},
+        "imported": false,
+        "lastComment": null,
+        "lastUpdated": "2024-03-08T21:18:23Z",
+        "likers": [],
+        "likersAsList": [],
+        "likes": 4,
+        "linkCount": null,
+        "links": [],
+        "myPreference": 0,
+        "origin": "Android",
+        "providers": [
+            {
+                "address": "{{ userName }}",
+                "class": "it.senape.ff.dto.RecipientDto",
+                "fullName": "{{ userFullName }}",
+                "id": 7642,
+                "name": "{{ userName }}",
+                "ownerId": 501,
+                "type": "PRIVATE"
+            }
+        ],
+        "sender": {
+            "avatarUrl": "{{ userAvatar }}",
+            "class": "it.senape.ff.dto.UserDto",
+            "fullName": "{{ userFullName }}",
+            "id": 501,
+            "locked": true,
+            "noindex": true,
+            "providers": [],
+            "role": null,
+            "username": "{{ userName }}"
+        },
+        "text": "{{ entryContent }}",
+        "totalComments": 4,
+        "type": null,
+        "visibility": "private"
+    },
+    "isHidden": false
+}
