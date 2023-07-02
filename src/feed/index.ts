@@ -8,6 +8,7 @@ import { decodeEntry } from './utils';
 
 export * from './bookmark';
 export default './endpoints';
+export * from './reactions';
 export * from './recipients';
 
 const ALLOWED_FILE_TYPES = ['image/png', 'image/x-png', 'image/gif', 'image/jpeg'];
