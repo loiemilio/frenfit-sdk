@@ -35,10 +35,23 @@ const listSubscribers = async (url: URL) => {
   };
 };
 
-export const listRoomIgnoredRequests = async (id: number) => {
-  await listSubscribers(endpoints.listIgnoredRequests(id));
+export const approveRoomSubscribeRequest = async (roomId: number, userId: number) => {
+  await ffetch(endpoints.approveSubscribeRequest(roomId, userId));
 };
 
 export const listRoomPendingRequests = (id: number) => listSubscribers(endpoints.listPendingRequests(id));
 
 export const listRoomSubscribers = (name: string, page = 1) => listSubscribers(endpoints.listSubscribers(name, page));
+
+export const unsubscribeFromRoom = async (id: number) => {
+  const body = new URLSearchParams();
+  body.set('id', String(id));
+
+  await ffetch(endpoints.unsubscribe, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body,
+  });
+};
