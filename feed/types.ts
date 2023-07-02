@@ -1,5 +1,16 @@
 import { Message } from '../../types';
 
+export type AddEntryRequest = {
+  recipientIds?: number[];
+  message: string;
+  files?: (Blob | File)[];
+  // user (?)
+};
+
+export type EditEntryRequest = {
+  message: string;
+};
+
 export type EntryResponse = {
   isHidden: boolean;
   entry: Message;
