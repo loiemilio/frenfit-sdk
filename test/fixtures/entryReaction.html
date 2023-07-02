@@ -1,0 +1,28 @@
+<span id="likes_{{ id }}">
+  
+    
+  
+
+
+	<a href="#" class="like" data-cid="{{ id }}">{% if liked %}<i class="icon icon-like-active">{% else %}<i class="icon icon-like"></i>{% endif %}</a>
+
+
+
+	<span id="comment_likesCounter_{{ id }}" class="hide">[
+    
+    <a href="#" class="likesCounter" data-id="{{ id }}" data-retrieve="like">{{ likes }}</a>
+    ]</span>
+
+- 
+
+  <a href="#" class="dislike" data-cid="{{ id }}">{% if disliked %}<i class="icon icon-dislike-active"></i>{% else %}<i class="icon icon-dislike"></i>{% endif %}</a>
+
+
+
+  <span id="comment_dislikesCounter_{{ id }}" class="hide">[
+  
+    <a href="#" class="likesCounter" data-id="{{ id }}" data-retrieve="dislike">{{ dislikes }}</a>
+  ]</span>
+
+  
+</span>
