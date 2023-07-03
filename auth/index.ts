@@ -2,10 +2,13 @@ import { clearData, ffetch } from '@support/client';
 import { InvalidCredentialsException, UnexpectedResponseException } from '@support/exceptions';
 import store, { ME_KEY } from '@support/store';
 
+import { clearAuthCookies, getAuthCookies } from './cookies';
 import endpoints from './endpoints';
 import { LoginRequest, MeResponse } from './types';
 
+export * from './cookies';
 export default './endpoints';
+export * from './types';
 
 export const login = async (request: LoginRequest) => {
   await clearData();
@@ -35,13 +38,16 @@ export const login = async (request: LoginRequest) => {
   if (location.includes('/login/authfail?login_error')) {
     throw new InvalidCredentialsException();
   }
+
+  return getAuthCookies();
 };
 
 export const logout = async () => {
   await ffetch(endpoints.logout);
+  clearAuthCookies();
 };
 
-export const getMe = async (fetch = false) => {
+export const getMe = async (fetch = false): Promise<MeResponse> => {
   let me = store.get(ME_KEY) as MeResponse | undefined;
 
   if (!me || fetch) {
@@ -53,10 +59,10 @@ export const getMe = async (fetch = false) => {
 
   return {
     avatarUrl: me.avatarUrl,
-    class: 'it.senape.ff.dto.UserDto',
     fullName: me.fullName,
     id: me.id,
     locked: me.locked,
     username: me.username,
+    type: 'User',
   };
 };
