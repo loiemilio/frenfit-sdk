@@ -137,11 +137,3 @@ export const postEntry = async (request: AddEntryRequest) => {
   const entryId = parseInt(match.groups.entryId, 10);
   return await getEntry(entryId, { checkIfBookmarked: false });
 };
-
-export const restoreEntry = async (id: number) => {
-  await ffetch(endpoints.restoreEntry(id), {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-    },
-  });
-};
