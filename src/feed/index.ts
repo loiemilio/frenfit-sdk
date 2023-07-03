@@ -3,11 +3,13 @@ import { FrenfitException, UnexpectedResponseException } from '@support/exceptio
 
 import { toggleBookmark } from './bookmark';
 import endpoints from './endpoints';
-import { AddEntryRequest, EditEntryRequest, EntryResponse, ListEntriesRequest, ListEntriesResponse } from './types';
+import { listEntryIds } from './entries';
+import { AddEntryRequest, EditEntryRequest, EntryResponse, ListEntriesRequest } from './types';
 import { decodeEntry } from './utils';
 
 export * from './bookmark';
 export default './endpoints';
+export * from './entries';
 export * from './reactions';
 export * from './recipients';
 export * from './types';
@@ -72,33 +74,13 @@ export const getEntry = async (
 };
 
 export const listEntries = async (request: ListEntriesRequest) => {
-  const { ids } = await listEntryIds(request);
-
-  const entries = await Promise.all(ids.map(id => getEntry(id)));
-
-  return {
-    ids,
-    entries,
-    page: request.page || 0,
-  } as ListEntriesResponse;
-};
-
-export const listEntryIds = async (request: ListEntriesRequest) => {
-  const url = frontendURL(request.feed);
+  const url = new URL(frontendURL(request.feed));
   request.page && url.searchParams.set('page', String(request.page));
 
-  const response = await ffetch(url);
+  const response = await listEntryIds(url);
+  const entries = await Promise.all(response.ids.map(id => getEntry(id)));
 
-  const text = await response.text();
-  const pattern = /"entry"\s+id="(\d+)"/gm;
-
-  const match = text.matchAll(pattern);
-  const ids = [...match].map(([, id]) => parseInt(id, 10));
-
-  return {
-    ids,
-    page: request.page || 0,
-  } as ListEntriesResponse;
+  return Object.assign({ entries }, response);
 };
 
 export const postEntry = async (request: AddEntryRequest) => {
