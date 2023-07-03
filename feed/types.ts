@@ -36,6 +36,7 @@ export type ListEntriesResponse = {
   entries?: Message[];
   ids: number[];
   page: number;
+  nextPage: boolean;
 };
 
 export type TargetFeed = {
