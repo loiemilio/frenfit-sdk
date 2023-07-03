@@ -27,6 +27,7 @@ export default {
       offset: 24 * (page - 1),
     }),
   myRooms: frontendURL('room/index'),
+  search: (query: string) => frontendURL('room/search?q={query}', { query: encodeURIComponent(query) }),
   silence: (id: number) => frontendURL('room/silence/{id}', { id }),
   toggleInHome: (id: number, inHome: 'true' | 'false') =>
     frontendURL('room/toggleHome?id={id}&inHome={inHome}', { id, inHome }),

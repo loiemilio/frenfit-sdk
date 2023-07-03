@@ -9,6 +9,7 @@ import { AddRoomRequest, EditRoomRequest as EditRoomRequest } from './types';
 
 export * from './actions';
 export default './endpoints';
+export * from './search';
 export * from './subscribers';
 
 export const addRoom = async (request: AddRoomRequest) => {
