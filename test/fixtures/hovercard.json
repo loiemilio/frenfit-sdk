@@ -1,0 +1,8 @@
+{% unless action %}{% assign action = "follow" %}{% endunless %}{
+    "action": "{{ action }}",
+    "bio": "{{ bio }}",
+    "dmLink": "//www.frenf.it/earlyadopters/message/to/{{ name }}",
+    "image": "{{ avatar }}",
+    "name": "{{ fullname }}",
+    "username": "{{ name }}"
+}
