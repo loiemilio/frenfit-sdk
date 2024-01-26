@@ -1,0 +1,10 @@
+<div>
+    {% for follower in followers %}
+    <div class="card_" id="{{ follower.id }}"></div>
+    {% endfor %}
+</div>
+<div id="ignoredRequests">
+    {% for ignoredFollower in ignoredFollowers %}
+    <div class="card_" id="{{ ignoredFollower.id }}"></div>
+    {% endfor %}
+</div>

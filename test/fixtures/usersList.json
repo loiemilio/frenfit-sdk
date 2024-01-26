@@ -1,0 +1,29 @@
+{
+    "user": {
+        "id": {{ user.id }},
+        "username": "{{ user.username }}",
+        "fullName": "{{ user.fullName }}",
+        "description": "{{ user.description }}",
+        "locked": {{ user.locked }},
+        "type": "User",
+        "avatarUrl": "{{ user.avatarUrl }}",
+        "email": "{{ user.email }}"
+    },
+    "usersList": [
+        {% for friend in friends %}
+        {
+            "id": {{ friend.id }},
+            "username": "{{ friend.username }}",
+            "fullName": "{{ friend.fullName }}",
+            "description": "{{ friend.description }}",
+            "locked": {{ friend.locked }},
+            "type": "User",
+            "avatarUrl": "{{ friend.avatarUrl }}",
+            "email": "{{ friend.email }}",
+            "commands": [
+                {% for command in friend.commands %}"{{ command }}"{% unless forloop.last %},{% endunless %}{% endfor %}
+            ]
+        }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+    ]
+}

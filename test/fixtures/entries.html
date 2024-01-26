@@ -1,5 +1,5 @@
 {% unless flwz%}{% assign flwz = "{ \"empty\": 0 }" %}{% endunless %}<!DOCTYPE html>
-
+{% unless blockedIdList%}{% assign blockedIdList = "[]" %}{% endunless %}
 
 
 
@@ -50,7 +50,7 @@
     <script>
         var serverUrl = "//www.frenf.it/earlyadopters";
         var rtHost = "/realtime/message";
-        var blockedIdList = "";
+        var blockedIdList = {{ blockedIdList }};
         var flwz = {{ flwz }};
     </script>
 
