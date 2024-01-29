@@ -1,0 +1,43 @@
+{
+  "name": "frenfit-sdk",
+  "version": "0.0.1",
+  "description": "A TypeScript ready SDK for building applications on Frenf.it APIs and web pages.",
+  "author": "Emilio Loi",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc",
+    "preview": "vite preview",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+  },
+  "dependencies": {
+    "entities": "^4.5.0",
+    "node-localstorage": "^3.0.5",
+    "store2": "^2.14.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/node-localstorage": "^1.3.3",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "prettier": "^3.1.1",
+    "source-map-support": "^0.5.21",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vite-plugin-dts": "^3.6.4"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/frenfit-sdk.js",
+      "require": "./dist/frenfit-sdk.umd.cjs"
+    }
+  }
+}
