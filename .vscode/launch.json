@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "node",
+            "name": "vscode-jest-tests.v2.frenfit-sdk",
+            "request": "launch",
+            "args": [
+                "test",
+                "--runInBand",
+                "--watchAll=false",
+                "--testNamePattern",
+                "${jest.testNamePattern}",
+                "--runTestsByPath",
+                "${jest.testFile}"
+            ],
+            "cwd": "/Users/emilio/Works/repositories/loiemilio/frenfit-sdk",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "runtimeExecutable": "yarn"
+        }
+    ]
+}
