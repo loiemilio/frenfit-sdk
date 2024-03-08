@@ -12,6 +12,10 @@ module.exports = {
   collectCoverageFrom: [
     './src/**/*.ts'
   ],
+  coverageReporters: [
+    'html-spa',
+    'json-summary',
+  ],
   moduleNameMapper,
   preset: 'ts-jest',
   testEnvironment: 'node',
