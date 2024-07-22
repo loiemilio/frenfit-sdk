@@ -1,0 +1,29 @@
+name: Jest Coverage Comment
+on:
+  pull_request:
+jobs:
+  build:
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          node: 20
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Jest Coverage Comment
+        uses: artiomtr/jest-coverage-report-action@v2.3.0 
+        with:
+          package-manager: yarn
+          test-script: yarn run test --ci --json --coverage --testLocationInResults --outputFile=report.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
