@@ -4,11 +4,9 @@
   "description": "A TypeScript ready SDK for building applications on Frenf.it APIs and web pages.",
   "author": "Emilio Loi",
   "type": "commonjs",
+  "main": "./dist/index.cjs",
   "scripts": {
-    "dev": "vite",
-    "build": "rollup -c && yarn run build:types",
-    "build:types": "tsc --project tsconfig.build.json --emitDeclarationOnly",
-    "preview": "vite preview",
+    "build": "rm -rf dist && rollup -c",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "yarn run lint -- --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -19,7 +17,6 @@
     "store2": "^2.14.2"
   },
   "devDependencies": {
-    "@rollup/plugin-alias": "^6.0.0",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
@@ -41,12 +38,10 @@
     "node-localstorage": "^3.0.5",
     "prettier": "^3.1.1",
     "rollup": "^4.53.3",
+    "rollup-plugin-dts": "^6.2.3",
     "rollup-plugin-typescript-paths": "^1.5.0",
-    "source-map-support": "^0.5.21",
     "ts-jest": "^29.1.2",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.10",
-    "vite-plugin-dts": "^3.6.4"
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
     "node-localstorage": "^3.0.5"
@@ -58,8 +53,13 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/frenfit-sdk.js",
-      "require": "./dist/frenfit-sdk.umd.cjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
-  }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ]
 }
