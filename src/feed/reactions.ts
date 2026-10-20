@@ -2,9 +2,8 @@ import { ffetch } from '@support/client';
 import { UnexpectedResponseException } from '@support/exceptions';
 import { evaluateReactionResponse } from '@support/reactions';
 
+import { getEntry } from './crud';
 import endpoints from './endpoints';
-
-import { getEntry } from '.';
 
 export const hideEntry = async (entryId: number) => {
   const body = new URLSearchParams();
