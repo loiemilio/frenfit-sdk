@@ -1,8 +1,13 @@
 {
   "name": "frenfit-sdk",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A TypeScript ready SDK for building applications on Frenf.it APIs and web pages.",
   "author": "Emilio Loi",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loiemilio/frenfit-sdk.git"
+  },
   "type": "commonjs",
   "main": "./dist/index.cjs",
   "scripts": {
@@ -10,7 +15,8 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "yarn run lint -- --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "yarn build"
   },
   "dependencies": {
     "entities": "^4.5.0",
