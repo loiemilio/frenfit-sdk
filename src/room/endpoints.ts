@@ -1,13 +1,17 @@
 import { frontendURL } from '@support/client';
 
 export default {
-  addRoom: frontendURL('room/save'),
+  get addRoom() {
+    return frontendURL('room/save');
+  },
   approveSubscribeRequest: (roomId: number, userId: number) =>
     frontendURL('room/approve?frenf={userId}&roomId={roomId}', {
       roomId,
       userId,
     }),
-  editRoom: frontendURL('room/update'),
+  get editRoom() {
+    return frontendURL('room/update');
+  },
   listIgnoredRequests: (id: number, page = 1) =>
     frontendURL('room/getIgnoredRequests?id={id}&offset={offset}&max=24&page={page}', {
       id,
@@ -26,11 +30,15 @@ export default {
       page,
       offset: 24 * (page - 1),
     }),
-  myRooms: frontendURL('room/index'),
+  get myRooms() {
+    return frontendURL('room/index');
+  },
   search: (query: string) => frontendURL('room/search?q={query}', { query: encodeURIComponent(query) }),
   silence: (id: number) => frontendURL('room/silence/{id}', { id }),
   toggleInHome: (id: number, inHome: 'true' | 'false') =>
     frontendURL('room/toggleHome?id={id}&inHome={inHome}', { id, inHome }),
   unsilence: (id: number) => frontendURL('room/desilence/{id}', { id }),
-  unsubscribe: frontendURL('room/unsubscribe'),
+  get unsubscribe() {
+    return frontendURL('room/unsubscribe');
+  },
 };

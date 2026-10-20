@@ -1,5 +1,7 @@
 import { frontendURL } from '@support/client';
 
 export default {
-  search: frontendURL('search/index'),
+  get search() {
+    return frontendURL('search/index');
+  },
 };

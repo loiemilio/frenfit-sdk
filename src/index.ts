@@ -5,4 +5,6 @@ export * from './friend';
 export * from './room';
 export * from './search';
 export * from './trash';
+export { configure } from './support/configuration';
+export type { Configuration } from './support/configuration';
 export { setStorage } from './support/store';
