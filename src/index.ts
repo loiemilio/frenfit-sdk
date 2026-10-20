@@ -5,3 +5,4 @@ export * from './friend';
 export * from './room';
 export * from './search';
 export * from './trash';
+export { setStorage } from './support/store';
