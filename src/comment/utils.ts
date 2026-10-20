@@ -7,7 +7,7 @@ export const decodeComment = (comment: Comment): Comment =>
   Object.assign({}, comment, {
     dislikers: (comment.dislikers || []).map(decodeUser),
     likers: (comment.likers || []).map(decodeUser),
-    origin: decodeHTML(comment.origin),
+    origin: comment.origin ? decodeHTML(comment.origin) : undefined,
     sender: decodeUser(comment.sender),
     text: decodeHTML(comment.text),
   });
