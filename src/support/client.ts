@@ -48,12 +48,18 @@ const withAuthCookies = (init?: RequestInit & FFetchInit) => {
   const jsessionId = store(JSESSIONID_KEY) as string;
 
   if (jsessionId) {
-    cookies.push(`JSESSIONID=${jsessionId}`);
+    cookies.push(`${JSESSIONID_KEY}=${jsessionId}`);
+  }
+
+  const jsessionId2 = store(FRENFIT_COOKE_KEY) as string;
+
+  if (jsessionId2) {
+    cookies.push(`${FRENFIT_COOKE_KEY}=${jsessionId2}`);
   }
 
   return Object.assign(init || {}, {
     headers: Object.assign(init?.headers || {}, {
-      Cookie: cookies.join(';\n'),
+      Cookie: cookies.join(';'),
     }),
   });
 };
