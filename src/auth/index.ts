@@ -29,7 +29,7 @@ export const login = async (request: LoginRequest) => {
     expectStatus: 302,
   });
 
-  const location = loginResponse.headers.get('Location');
+  const location = loginResponse.headers.get('Location') || (loginResponse.redirected ? loginResponse.url : null);
 
   if (!location) {
     throw new UnexpectedResponseException(loginResponse, {

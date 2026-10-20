@@ -57,6 +57,10 @@ const withAuthCookies = (init?: RequestInit & FFetchInit) => {
     cookies.push(`${FRENFIT_COOKE_KEY}=${jsessionId2}`);
   }
 
+  if (!cookies.length) {
+    return init || {};
+  }
+
   return Object.assign(init || {}, {
     headers: Object.assign(init?.headers || {}, {
       Cookie: cookies.join(';'),
@@ -94,8 +98,12 @@ const extractCookieValue = (response: Response, cookieName: string, throwWhenMis
 };
 
 const storeAuthCookies = (response: Response) => {
+  // Cookies set by a followed redirect hop never reach us, so only require them on direct responses
   const jsessionId = store.get(JSESSIONID_KEY) as string;
-  store.set(JSESSIONID_KEY, extractCookieValue(response, JSESSIONID_KEY, !jsessionId) || jsessionId);
+  store.set(
+    JSESSIONID_KEY,
+    extractCookieValue(response, JSESSIONID_KEY, !jsessionId && !response.redirected) || jsessionId,
+  );
 
   const frenfitCookie = store.get(FRENFIT_COOKE_KEY) as string;
   store.set(FRENFIT_COOKE_KEY, extractCookieValue(response, FRENFIT_COOKE_KEY) || frenfitCookie);
@@ -154,7 +162,10 @@ export const ffetch = async (input: RequestInfo | URL, init?: RequestInit & FFet
   }
 
   const expectedStatus = init.expectStatus || 200;
-  if (response.status !== expectedStatus) {
+  // React Native ignores redirect: 'manual' and follows the expected redirect instead
+  const followedExpectedRedirect = expectedStatus >= 300 && expectedStatus <= 399 && response.redirected && response.ok;
+
+  if (response.status !== expectedStatus && !followedExpectedRedirect) {
     throw new UnexpectedResponseException(response, {
       url: urlToString(input),
       expectedStatus,

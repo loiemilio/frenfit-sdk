@@ -172,3 +172,45 @@ describe('getting me', () => {
     expect(newMe).toEqual(Object.assign({ type: 'User' }, me));
   });
 });
+
+describe('when the runtime follows the login redirect', () => {
+  test('it stores auth cookies on successful logins', async () => {
+    setAuthCookies(randomString(), randomString());
+
+    fetchMock.post(
+      authEndpoints.login.toString(),
+      mockFrenfitResponse({
+        headers: { 'Set-Cookie': '' },
+        redirectUrl: 'https://www.frenf.it/earlyadopters/',
+        status: 200,
+      }),
+    );
+
+    const result = await login({
+      password: randomString(),
+      username: randomString(),
+    });
+
+    expect(result).toEqual({ jsessionId: null, frenfitCookie: null } as AuthCookies);
+  });
+
+  test('it throws InvalidCredentialsException on failed logins', async () => {
+    fetchMock.post(
+      authEndpoints.login.toString(),
+      mockFrenfitResponse({
+        headers: { 'Set-Cookie': '' },
+        redirectUrl: 'https://www.frenf.it/earlyadopters/login/authfail?login_error',
+        status: 200,
+      }),
+    );
+
+    const action = async () => {
+      await login({
+        password: randomString(),
+        username: randomString(),
+      });
+    };
+
+    await expect(action).rejects.toThrow(InvalidCredentialsException);
+  });
+});
