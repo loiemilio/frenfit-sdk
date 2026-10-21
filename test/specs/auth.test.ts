@@ -214,3 +214,24 @@ describe('when the runtime follows the login redirect', () => {
     await expect(action).rejects.toThrow(InvalidCredentialsException);
   });
 });
+
+test('it throws InvalidCredentialsException when the failure Location carries a session id', async () => {
+  fetchMock.post(
+    authEndpoints.login.toString(),
+    mockFrenfitResponse({
+      headers: {
+        Location: '/earlyadopters/login/authfail;jsessionid=ABC123?login_error=1',
+      },
+      status: 302,
+    }),
+  );
+
+  const action = async () => {
+    await login({
+      password: randomString(),
+      username: randomString(),
+    });
+  };
+
+  await expect(action).rejects.toThrow(InvalidCredentialsException);
+});

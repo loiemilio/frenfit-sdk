@@ -37,7 +37,7 @@ export const login = async (request: LoginRequest) => {
     });
   }
 
-  if (location.includes('/login/authfail?login_error')) {
+  if (location.includes('/login/authfail')) {
     throw new InvalidCredentialsException();
   }
 
