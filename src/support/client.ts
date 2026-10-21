@@ -68,42 +68,17 @@ const withAuthCookies = (init?: RequestInit & FFetchInit) => {
   });
 };
 
-const extractCookieValue = (response: Response, cookieName: string, throwWhenMissing = false) => {
+const extractCookieValue = (response: Response, cookieName: string) => {
   const setCookie = response.headers.get('Set-Cookie');
+  const match = setCookie && new RegExp(`${cookieName}=(?<value>[^;\\s]+)`).exec(setCookie);
 
-  if (!setCookie) {
-    if (throwWhenMissing) {
-      throw new UnexpectedResponseException(response, {
-        missingHeader: 'Response does not provide Set-Cookie header',
-      });
-    }
-
-    return;
-  }
-
-  const regexp = new RegExp(`${cookieName}=(?<value>[^;\\s]+)`, 'g');
-  const match = regexp.exec(setCookie);
-
-  if (!match?.groups?.value) {
-    if (throwWhenMissing) {
-      throw new UnexpectedResponseException(response, {
-        invalidHeader: `Response Set-Cookie header does not provide ${cookieName} value`,
-      });
-    }
-
-    return;
-  }
-
-  return match.groups.value;
+  return match?.groups?.value;
 };
 
 const storeAuthCookies = (response: Response) => {
-  // Cookies set by a followed redirect hop never reach us, so only require them on direct responses
+  // Browsers and React Native may hide Set-Cookie and keep cookies themselves, so a missing one is not an error
   const jsessionId = store.get(JSESSIONID_KEY) as string;
-  store.set(
-    JSESSIONID_KEY,
-    extractCookieValue(response, JSESSIONID_KEY, !jsessionId && !response.redirected) || jsessionId,
-  );
+  store.set(JSESSIONID_KEY, extractCookieValue(response, JSESSIONID_KEY) || jsessionId);
 
   const frenfitCookie = store.get(FRENFIT_COOKE_KEY) as string;
   store.set(FRENFIT_COOKE_KEY, extractCookieValue(response, FRENFIT_COOKE_KEY) || frenfitCookie);
@@ -162,10 +137,13 @@ export const ffetch = async (input: RequestInfo | URL, init?: RequestInit & FFet
   }
 
   const expectedStatus = init.expectStatus || 200;
-  // React Native ignores redirect: 'manual' and follows the expected redirect instead
-  const followedExpectedRedirect = expectedStatus >= 300 && expectedStatus <= 399 && response.redirected && response.ok;
+  // React Native ignores redirect: 'manual' and follows the redirect; browsers return an opaque redirect
+  const gotExpectedRedirect =
+    expectedStatus >= 300 &&
+    expectedStatus <= 399 &&
+    ((response.redirected && response.ok) || response.type === 'opaqueredirect');
 
-  if (response.status !== expectedStatus && !followedExpectedRedirect) {
+  if (response.status !== expectedStatus && !gotExpectedRedirect) {
     throw new UnexpectedResponseException(response, {
       url: urlToString(input),
       expectedStatus,

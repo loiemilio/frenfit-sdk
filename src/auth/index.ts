@@ -29,6 +29,11 @@ export const login = async (request: LoginRequest) => {
     expectStatus: 302,
   });
 
+  // Browsers hide the outcome of an opaque redirect: callers confirm the session, e.g. with getMe()
+  if (loginResponse.type === 'opaqueredirect') {
+    return getAuthCookies();
+  }
+
   const location = loginResponse.headers.get('Location') || (loginResponse.redirected ? loginResponse.url : null);
 
   if (!location) {

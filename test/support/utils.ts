@@ -34,3 +34,12 @@ export const mockFrenfitResponse = (init?: MockResponseObject & { body?: string 
     ),
   });
 };
+
+export const opaqueRedirectResponse = () => {
+  const response = new Response(null, { status: 200 });
+  Object.defineProperties(response, {
+    status: { value: 0 },
+    type: { value: 'opaqueredirect' },
+  });
+  return response;
+};

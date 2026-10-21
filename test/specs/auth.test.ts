@@ -3,7 +3,7 @@ import fetchMock from 'fetch-mock';
 import { AuthCookies, authEndpoints, getAuthCookies, getMe, login, logout, setAuthCookies } from '@sdk/auth';
 import { InvalidCredentialsException, UnexpectedResponseException } from '@sdk/support/exceptions';
 import store, { FRENFIT_COOKE_KEY, JSESSIONID_KEY, ME_KEY } from '@sdk/support/store';
-import { mockFrenfitResponse, randomString } from '@test/support/utils';
+import { mockFrenfitResponse, opaqueRedirectResponse, randomString } from '@test/support/utils';
 
 afterEach(() => {
   fetchMock.restore();
@@ -234,4 +234,15 @@ test('it throws InvalidCredentialsException when the failure Location carries a 
   };
 
   await expect(action).rejects.toThrow(InvalidCredentialsException);
+});
+
+test('it leaves verification to the caller when the browser returns an opaque redirect', async () => {
+  jest.spyOn(global, 'fetch').mockResolvedValueOnce(opaqueRedirectResponse());
+
+  const result = await login({
+    password: randomString(),
+    username: randomString(),
+  });
+
+  expect(result).toEqual({ jsessionId: null, frenfitCookie: null } as AuthCookies);
 });
